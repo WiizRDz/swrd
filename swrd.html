@@ -404,7 +404,7 @@ class Projectile {
 		if (hit && !(curA == "w" && prev == "w")) {
 			if (jump) { yc = 8;}
 			proj.splice(proj.indexOf(this), 1);
-			score++;
+			if (lives > 0) {score++;}
 		}
 		if (hit && curA == "w" && prev == "w") {
 			this.d *= -1;
