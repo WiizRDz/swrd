@@ -1,0 +1,510 @@
+<!doctypehtml>
+<html>
+	<head>
+		<title>swrd</title>
+	</head>
+
+	<body style="background: #000000; top = 0; left = 0;">
+
+		<canvas id="myCanvas"></canvas>
+
+	</body>
+
+	<script>
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var width = canvas.width;
+var height = canvas.height;
+var x = window.innerWidth/2;
+var floorTop = 350;
+var y = window.innerHeight-floorTop/2;
+var u = false;
+var d = false;
+var l = false;
+var r = false;
+var sp = 6;
+var yp = 0;
+var yc = 0;
+var jump = false;
+var attackQ = [];
+var curA = null;
+var facing = 1;
+var wob = 0;
+var types = ["w", "d"];
+var methods = [attackW, attackD];
+var attJ = false;
+var attT = 0;
+var prev = null;
+var totTime = 0;
+var proj = [];
+var lives = 5;
+var score = 0;
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+var allowKP = true;
+function keyDownHandler(e) {
+	if (e.repeat != undefined) {
+		allowKP = !e.repeat;
+	}
+	if (!allowKP) {return;}
+	allowKP = false;
+
+	if (e.keyCode == 87) {
+		// w
+		if (attackQ.length < 2) {attackQ.push("w");}
+	}
+	if (e.keyCode == 68) {
+		// d
+		if (attackQ.length < 2) {attackQ.push("d");}
+	}
+	if (e.keyCode == 83) {
+		// s
+		
+	}
+	if (e.keyCode == 65) {
+		// a
+		
+	}
+	if (e.keyCode == 49) {
+		// 1
+
+	}
+	if (e.keyCode == 50) {
+		// 2
+
+	}
+	if (e.keyCode == 51) {
+		// 3
+
+	}
+	if (e.keyCode == 52) {
+		// 4
+
+	}
+	if (e.keyCode == 37) {
+		// left
+		l = true;
+	}
+	if (e.keyCode == 38) {
+		// up
+		u = true;
+	}
+	if (e.keyCode == 39) {
+		// right
+		r = true;
+	}
+	if (e.keyCode == 40) {
+		// down
+		d = true;
+	}
+	if (e.keyCode == 32) {
+		// space
+		jump = true;
+	}
+}
+
+function keyUpHandler(e) {
+	if (e.keyCode == 32) {
+		// space
+
+	}
+	if (e.keyCode == 37) {
+		// left
+		l = false;
+	}
+	if (e.keyCode == 38) {
+		// up
+		u = false;
+	}
+	if (e.keyCode == 39) {
+		// right
+		r = false;
+	}
+	if (e.keyCode == 40) {
+		// down
+		d = false;
+	}
+}
+
+function mouseout() {
+
+}
+
+function mouseClick(e,s) {
+	if (s == 'd') {
+
+		//console.log('down');
+	}
+	if (s == 'u') {
+
+		//console.log('up');
+	}
+}
+
+function scrollWheel(e) {
+	if (e.wheelDelta > 0) {
+
+	}
+	if (e.wheelDelta < 0) {
+	
+	}
+}
+
+function mousePosition(e) {
+	// xa = e.clientX;
+	// ya = e.clientY;
+	//console.log('x = ', e.clientX, 'y = ', e.clientY);
+}
+
+function inBounds() {
+	if (x < 25) {x = 25;}
+	if (x > width-25) {x = width-25;}
+	if (y > height-25) {y = height-25;}
+	if (y < height-floorTop-10) {y = height-floorTop-10;}
+	return (x > 25 && x < width-25 && y < height-25 && y > height-floorTop-10);
+}
+
+function doJump() {
+	if (!jump) {return;}
+	if (yp == 0) {
+		yc = 8;
+	}
+	yp -= yc;
+	yc -= .2;
+	if (yp > 0) {
+		yp = 0;
+		yc = 0;
+		jump = false;
+	}
+}
+
+function moveChar() {
+	if (u) {y-=sp; wob -= .1;}
+	if (d) {y+=sp; wob += .1;}
+	if (l) {x-=sp; facing = -1; wob -= .1;}
+	if (r) {x+=sp; facing = 1; wob += .1;}
+	doJump();
+	ya = y + yp;
+	inBounds();
+}
+
+function drawShadow() {
+	ctx.save();
+	ctx.scale(1, .25);
+	ctx.beginPath();
+	ctx.arc(x, 4*y+4*25, 35, 0, Math.PI*2, false);
+	ctx.strokeStyle = "#dddddd";
+    ctx.lineWidth = 8;
+    ctx.fillStyle = "#bbbbbb";
+	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+	ctx.restore();
+}
+
+function drawChar() {
+	moveChar();
+	drawShadow();
+	ctx.beginPath();
+    ctx.rect(x-25, ya-25, 50, 50);
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 3;
+    ctx.fillStyle = "#eeeeee";
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function drawFloor() {
+	ctx.beginPath();
+	ctx.rect(0, height-floorTop, width, floorTop);
+	ctx.fillStyle = "#ffffff";
+	ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+	ctx.rect(0, 0, width, height-floorTop);
+	ctx.fillStyle = "#cccccc";
+	ctx.fill();
+    ctx.closePath();
+}
+
+function wobble() {
+	return 4*Math.sin(1.1*wob);
+}
+
+function attack() {
+	if (attackQ.length == 0 && curA == null) {
+		ctx.save();
+		ctx.beginPath();
+		ctx.translate(x+facing*(25), ya-40);
+		ctx.rotate((facing*50+wobble())*Math.PI/180);
+	    ctx.rect(facing*35-2.5+wobble(), 0, 5, 40);
+	    ctx.fillStyle = "#275B7C";
+	    ctx.fill();
+	    ctx.closePath();
+	    ctx.restore();
+	    prev = null;
+		return;
+	}
+
+	if (curA != null) {
+		methods[types.indexOf(curA)](attJ, prev);
+		return;
+	}
+	
+	attJ = jump;
+	attT = 0;
+	methods[types.indexOf(attackQ[0])](attJ, prev);
+	curA = attackQ[0];
+	attackQ.splice(0, 1);
+}
+
+function attackW(jumping, previ) {
+	if (previ != "w") {
+		if (attT < 50) {
+			if (jumping) {
+				ctx.save();
+				ctx.beginPath();
+				ctx.setTransform(1,0,0,-1,0,height);
+				ctx.translate(x+facing*25-2.5, height-ya);
+				ctx.rotate((-facing*(Math.sin(.032*(attT))))*Math.PI);
+			    ctx.rect(0, 0, 5, 40);
+			    ctx.fillStyle = "#275B7C";
+			    ctx.fill();
+			    ctx.closePath();
+			    ctx.restore();
+			    if (yc < -1.25) {yc = -1.25;}
+			} else {
+				ctx.save();
+				ctx.beginPath();
+				ctx.setTransform(1,0,0,-1,0,height);
+				ctx.translate(x+facing*25-2.5, height-ya);
+				ctx.rotate((facing*(Math.sin(.032*(attT))))*Math.PI+Math.PI);
+			    ctx.rect(0, 0, 5, 40);
+			    ctx.fillStyle = "#275B7C";
+			    ctx.fill();
+			    ctx.closePath();
+			    ctx.restore();
+			}
+			attT++;
+		} else {
+			prev = curA;
+			curA = null;
+		}
+	} else {
+		if (attT < 40) {
+			if (jumping) {
+				ctx.save();
+				ctx.beginPath();
+				ctx.setTransform(1,0,0,-1,0,height);
+				ctx.translate(x+facing*35-2.5, height-ya);
+				ctx.rotate((2*facing*(Math.sin(.035*(attT))))*Math.PI+Math.PI);
+			    ctx.rect(0, -19, 5, 40);
+			    ctx.fillStyle = "#275B7C";
+			    ctx.fill();
+			    ctx.closePath();
+			    ctx.restore();
+			} else {
+				ctx.save();
+				ctx.beginPath();
+				ctx.setTransform(1,0,0,-1,0,height);
+				ctx.translate(x+facing*35-2.5, height-ya);
+				ctx.rotate((-2*facing*(Math.sin(.035*(attT))))*Math.PI);
+			    ctx.rect(0, -19, 5, 40);
+			    ctx.fillStyle = "#275B7C";
+			    ctx.fill();
+			    ctx.closePath();
+			    ctx.restore();
+			}
+			attT++;
+		} else {
+			prev = curA;
+			curA = null;
+		}
+	}
+} 
+
+function attackD(jumping, previ) {
+	if (previ != "d") {
+		if (attT < 30) {
+			ctx.save();
+			ctx.beginPath();
+			ctx.setTransform(1,0,0,-1,0,height);
+			ctx.translate(x+facing*25-2.5, height-ya);
+			ctx.rotate((-facing*(Math.sin(.105*attT)))*Math.PI);
+		    ctx.rect(0, 0, 5, 20*Math.sin(.105*attT)+20);
+		    ctx.fillStyle = "#275B7C";
+		    ctx.fill();
+		    ctx.closePath();
+		    ctx.restore();
+			attT++;
+		} else {
+			prev = curA;
+			curA = null;
+		}
+	} else {
+		if (attT < 20) {
+			ctx.save();
+			ctx.beginPath();
+			ctx.setTransform(1,0,0,-1,0,height);
+			ctx.translate(x+facing*25-2.5, height-ya);
+			ctx.rotate((-facing*(Math.sin(.16*attT)))*Math.PI);
+		    ctx.rect(0, 0, 5, 20*Math.sin(.105*attT)+20);
+		    ctx.fillStyle = "#275B7C";
+		    ctx.fill();
+		    ctx.closePath();
+		    ctx.restore();
+			attT++;
+			if (yc < -1.8) {yc = -1.8;}
+		} else {
+			prev = curA;
+			curA = null;
+		}
+	}
+}
+
+function drawLife() {
+	ctx.beginPath();
+	ctx.rect(width/2-250, height/9, 500, 175);
+	ctx.lineWidth = 8;
+	ctx.strokeStyle = "#000000";
+	ctx.fillStyle = "#dddddd";
+	ctx.fill()
+	ctx.stroke();
+    ctx.closePath();
+    for (i = 0; i < lives; i++) {
+    	ctx.beginPath();
+		ctx.rect(width/2-240 + i*97.5, height/9+10, 90, 155);
+		ctx.fillStyle = "#1C273C";
+		ctx.fill();
+	    ctx.closePath();
+    }
+}
+
+function hitDetection(px, py) {
+	if (curA == null) {return false;}
+	if (curA == "w" && prev != "w") { if (facing == 1) {return (px >= x - 20 && px <= x + 65 && py <= ya + 45 && py >= ya - 45); } else { return (px >= x - 65 && px <= x + 20 && py <= ya + 45 && py >= ya - 45); } }
+	if (curA == "w" && prev == "w") { if (facing == 1) {return (px >= x + 20 && px <= x + 45 && py <= ya + 35 && py >= ya - 35); } else { return (px >= x - 45 && px <= x - 20 && py <= ya + 35 && py >= ya - 35); } }
+	if (curA == "d" && prev != "d") { if (facing == 1) {return (px >= x && px <= x + 55 && py <= ya + 30 && py >= ya - 30); } else { return (px >= x - 55 && px <= x && py <= ya + 30 && py >= ya - 30); } }
+	if (curA == "d" && prev == "d") { if (facing == 1) {return (px >= x + 5 && px <= x + 40 && py <= ya + 30 && py >= ya - 30); } else { return (px >= x - 40 && px <= x - 5 && py <= ya + 30 && py >= ya - 30); } }
+}
+
+class Projectile {
+	constructor() {
+		this.y = Math.random()*floorTop + height - floorTop;
+		this.h = Math.random()*2 + 4
+		if (Math.random() >= .5) { this.x = width + 15;	this.d = -1; this.c = "#FF805B"; } else { this.x = -15; this.d = 1; this.c = "#6291EA"; }
+		if (.0005*totTime < 3) { this.s = .0005*totTime; } else { this.s = 3; }
+	}
+
+	update() {
+		var hit = hitDetection(this.x, this.y);
+		if (hit && !(curA == "w" && prev == "w")) {
+			if (jump) { yc = 8;}
+			proj.splice(proj.indexOf(this), 1);
+			score++;
+		}
+		if (hit && curA == "w" && prev == "w") {
+			this.d *= -1;
+		}
+		if (this.y > y) {
+			ctx.beginPath(); // projectile
+		    ctx.rect(this.x-5, this.y-5, 10, 10);
+		    ctx.fillStyle = this.c;
+		    ctx.fill();
+		    ctx.closePath();
+		} else {
+			ctx.save();
+			ctx.beginPath(); // projectile
+			ctx.rect(0, ya-25, x-25, 50);
+			ctx.rect(0, 0, width, ya-25);
+			ctx.rect(x+25, ya-25, width-x-25, 50);
+			ctx.rect(0, ya+25, width, height-(ya+25));
+			ctx.clip();
+			ctx.fillStyle = this.c;
+		    ctx.fillRect(this.x-5, this.y-5, 10, 10);
+		    ctx.closePath();
+		    ctx.restore();
+		}
+	    
+	    if (this.c == "#FF805B") {
+	    	if (this.x < 0) { lives--; proj.splice(proj.indexOf(this), 1); } if (this.x > width-10) { this.d = -1; }
+	    } else {
+	    	if (this.x < 0) { this.d = 1; } if (this.x > width-10) { lives--; proj.splice(proj.indexOf(this), 1); }
+	    }
+	    this.x += this.d*this.s;
+	}
+
+	shadow() {
+		ctx.save(); // shadow
+		ctx.scale(1, .25);
+		ctx.beginPath();
+		ctx.arc(this.x, 4*this.y+this.h*25, 5, 0, Math.PI*2, false);
+		ctx.strokeStyle = "#dddddd";
+	    ctx.lineWidth = 8;
+	    ctx.fillStyle = "#bbbbbb";
+		ctx.fill();
+		ctx.stroke();
+		ctx.closePath();
+		ctx.restore();
+	}
+}
+
+function drawTitle() {
+	if (lives <= 0) {return;}
+	ctx.save();
+	for (i = 0; i < lives; i++) {
+		ctx.rect(width/2-240 + i*97.5, height/9+10, 90, 155);
+    }
+	ctx.clip();
+	ctx.font = "225px Consolas";
+	ctx.fillStyle = "#273755"
+	ctx.fillText("swrd",width/2-250,height/9+165);
+	ctx.restore();
+}
+
+function drawScore() {
+	ctx.save();
+	ctx.font = "225px Consolas";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "#C0C0C0"
+	ctx.fillText(score.toString(),width/2, height/2-30); 
+	ctx.restore();
+}
+
+function update() {
+	if (canvas.width != window.innerWidth-20 || canvas.height != window.innerHeight-20) {
+		canvas.width = window.innerWidth-20;
+		canvas.height = window.innerHeight-20;
+		width = canvas.width;
+		height = canvas.height;
+	}
+	ctx.clearRect(0, 0, width, height);
+	drawFloor();
+	drawLife();
+	drawTitle();
+	drawScore();
+	for (i = 0; i < proj.length; i++) {
+		proj[i].shadow();
+	}
+	drawChar();
+	attack();
+	if (totTime % 100 == 0) { let p = new Projectile(); proj.push(p);}
+	for (i = 0; i < proj.length; i++) {
+		try { proj[i].update(); }
+		catch(TypeError){}
+	}
+	totTime += 1;
+	if (lives <= 0) {
+		sp = 1;
+		jump = false;
+		yp = 0;
+	}
+}
+
+setInterval(update,10);
+	</script>
+
+</html>
