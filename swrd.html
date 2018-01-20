@@ -396,7 +396,7 @@ class Projectile {
 		this.y = Math.random()*floorTop + height - floorTop;
 		this.h = Math.random()*2 + 4
 		if (Math.random() >= .5) { this.x = width + 15;	this.d = -1; this.c = "#FF805B"; } else { this.x = -15; this.d = 1; this.c = "#6291EA"; }
-		if (.0005*totTime < 3) { this.s = .0005*totTime; } else { this.s = 3; }
+		if (.0005*totTime < 4) { this.s = .0005*totTime; } else { this.s = 4; }
 	}
 
 	update() {
