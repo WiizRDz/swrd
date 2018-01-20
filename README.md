@@ -2,6 +2,7 @@
 
 Instructions
   - Download and run swrd.html in a browser that supports html5 canvas
+  - **OR** go to wiizrdz.github.io/swrd/
 ___
 
 Controls
