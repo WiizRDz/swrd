@@ -59,30 +59,6 @@ function keyDownHandler(e) {
 		// d
 		if (attackQ.length < 2) {attackQ.push("d");}
 	}
-	if (e.keyCode == 83) {
-		// s
-		
-	}
-	if (e.keyCode == 65) {
-		// a
-		
-	}
-	if (e.keyCode == 49) {
-		// 1
-
-	}
-	if (e.keyCode == 50) {
-		// 2
-
-	}
-	if (e.keyCode == 51) {
-		// 3
-
-	}
-	if (e.keyCode == 52) {
-		// 4
-
-	}
 	if (e.keyCode == 37) {
 		// left
 		l = true;
@@ -106,10 +82,6 @@ function keyDownHandler(e) {
 }
 
 function keyUpHandler(e) {
-	if (e.keyCode == 32) {
-		// space
-
-	}
 	if (e.keyCode == 37) {
 		// left
 		l = false;
@@ -126,36 +98,6 @@ function keyUpHandler(e) {
 		// down
 		d = false;
 	}
-}
-
-function mouseout() {
-
-}
-
-function mouseClick(e,s) {
-	if (s == 'd') {
-
-		//console.log('down');
-	}
-	if (s == 'u') {
-
-		//console.log('up');
-	}
-}
-
-function scrollWheel(e) {
-	if (e.wheelDelta > 0) {
-
-	}
-	if (e.wheelDelta < 0) {
-	
-	}
-}
-
-function mousePosition(e) {
-	// xa = e.clientX;
-	// ya = e.clientY;
-	//console.log('x = ', e.clientX, 'y = ', e.clientY);
 }
 
 function inBounds() {
