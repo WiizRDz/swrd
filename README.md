@@ -16,3 +16,6 @@ Controls
     - Spamming D for dear life as you struggle to get any projectiles will use spam, poor range, decent at getting groups, requires more accuracy than other longer range attacks, spamming in air will grant a small increase to airtime
   - Killing enemies in air grants you another jump, these can be chained together to give increased speed at a loss to accuracy
   - Press F11 to go into fullscreen mode for best experience
+
+
+##### On smaller laptops the score may overlap the lives meter
